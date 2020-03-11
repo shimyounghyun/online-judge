@@ -2,7 +2,22 @@ import React from 'react';
 import styled from 'styled-components';
 
 const Result = ({isOpen, close, result}) => {
-    console.log(result);
+    let MSG = "";
+    if (result.error == 1){
+        MSG = "컴파일 오류";
+    }else if (result.error == 134){
+        MSG = "Abort 에러";
+    }else if (result.error == 138){
+        MSG = "버스 에러";
+    }else if (result.error == 139){
+        MSG = "세그먼테이션 오류";
+    }else if (result.error == 142){
+        MSG = "시간 초과";
+    }else if (result.error == 0 && result.success == result.total){
+        MSG = "정답";
+    }else{
+        MSG = "오답";
+    }
     return (
         <>{
             isOpen ?
@@ -10,7 +25,7 @@ const Result = ({isOpen, close, result}) => {
                 <ModalOverlay/>
                 <Modal>
                     <p className="title">
-                        {result.error == 1 ? "컴파일 오류" : (result.success == result.total ? "정답!" : "오답")}
+                        {MSG}
                     </p>
                     <div className="content">
                         {result.error == 0 ?
