@@ -1,13 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
-OBJ='{"error":%s, "toatal":%s, "success":%s}'
+OBJ='{"error":%s, "total":%s, "success":%s}'
 TOTAL=0
 SUCCESS=0
 if [ -e ./user_exe ]
 then
     rm -f ./user_exe
 fi
-clang -Wextra -Wall -Werror ./tests/$1/main.c $1.c -I./ -o user_exe
+clang -Wextra -Wall -Werror ./tests/$1/main.c $1.c -I./ -o user_exe 
 if [ ! -e ./user_exe ]
 then
     echo $(printf "${OBJ}" "1" "${TOTAL}" "${SUCCESS}")
@@ -17,7 +17,7 @@ fi
 cd tests/$1
 test_count=$(ls -l *.output | wc -l)
 TOTAL=${test_count}
-let "k=1"
+k=1
 while [ $k -le $test_count ]
 do
     text=""
@@ -42,6 +42,10 @@ do
     then
         SUCCESS=$((SUCCESS+1))
     fi
-    let "k+=1"
+    k=$((k+1))
 done
+if [ -e $1.c ]
+then
+	rm $1.c
+fi
 echo $(printf "${OBJ}" "0" "${TOTAL}" "${SUCCESS}")

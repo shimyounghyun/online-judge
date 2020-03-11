@@ -24,7 +24,7 @@ export default class Main extends React.Component{
 		}
 	}
 
-	handleListItemClick = () => async (func_name) => {
+	handleListItemClick = async (func_name) => {
 		if (this.state.func_name === func_name) return;
 		try{
 			const response = await fetch('http://54.180.94.208:4000/write/'+func_name);
@@ -45,7 +45,6 @@ export default class Main extends React.Component{
 			<>
 				<Header/>
 				<Wrapper>
-					<Search/>
 					<List
 						list={list}
 						func_name={func_name}

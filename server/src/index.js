@@ -14,9 +14,11 @@ const options = {
 }
 
 const app = new Koa();
-// app.use(compress());
+app.use(compress());
 app.use(bodyParser());
-app.use(cors());
+app.use(cors({
+	origin : '*'
+}));
 
 const router = new Router();
 const execSync = require('child_process').execSync;
@@ -26,13 +28,19 @@ router.get('/', (ctx) =>{
 });
 
 router.get('/judge-all-list', async (ctx, next) =>{
-	ctx.body = execSync('/bin/sh name_arr.sh').toString();
+	ctx.body = execSync('/bin/bash name_arr.sh').toString();
 });
 
 router.get('/write/:func_name', async (ctx, next) => {
 	const {func_name} = ctx.params;
 	console.log('/write/',func_name+' 진입');
-	ctx.body = execSync('/bin/sh funcset.sh '+func_name).toString();
+	let data = '{"error":1}';
+	try{
+		data = execSync('/bin/sh funcset.sh '+func_name).toString();
+	}catch(e){
+		console.log(e);
+	}
+	ctx.body = data;
 });
 
 router.post('/:func_name', async (ctx, next)=> {
@@ -43,13 +51,19 @@ router.post('/:func_name', async (ctx, next)=> {
 			console.log(err);
 		}
 	});
-	ctx.body = execSync('/bin/sh grademe.sh '+func_name).toString();		
+	let data = '{"error":1}';
+	try{
+		data = execSync('/bin/bash grademe.sh '+func_name).toString();	
+	}catch(e){
+		console.log(e.error);
+	}
+	ctx.body = data; 		
 });
 
 
 app.use(router.routes()).use(router.allowedMethods());
-https.createServer(options, app.callback()).listen(4000, function(){
-	console.log("server is listening on port 4000");
-});
-// app.listen(4000);
+//https.createServer(options, app.callback()).listen(4000, function(){
+//	console.log("server is listening on port 4000");
+//});
+ app.listen(4000);
 // http.createServer(app.callback()).listen(4000);
