@@ -4,30 +4,52 @@ const Router = require('koa-router');
 const fs = require('fs');
 const https = require('https');
 const http = require('http');
-const cors = require('koa2-cors');
+const cors = require('@koa/cors');
+const bodyParser = require('koa-bodyparser');
+const compress = require('koa-bodyparser');
+
 const options = {
 	key: fs.readFileSync('./keys/private.pem'),
 	cert: fs.readFileSync('./keys/public.pem')
 }
 
 const app = new Koa();
-const router = new Router();
-const exec = require('child_process').exec;
+// app.use(compress());
+app.use(bodyParser());
+app.use(cors());
 
-router.get('/judge-all-list', async (ctx, next) =>{
-	exec("/bin/sh test_list.sh", (error, stdout, stderr) => {
-		if(error !== null){
-			console.log('exec error: '+error);
-		}
-		
-	});
-	ctx.body = stdout;
+const router = new Router();
+const execSync = require('child_process').execSync;
+
+router.get('/', (ctx) =>{
+	ctx.body = 'Hi';	
 });
 
-app.use(cors());
-app.use(router.routes());
-app.use(router.allowedMethods());
+router.get('/judge-all-list', async (ctx, next) =>{
+	ctx.body = execSync('/bin/sh name_arr.sh').toString();
+});
+
+router.get('/write/:func_name', async (ctx, next) => {
+	const {func_name} = ctx.params;
+	console.log('/write/',func_name+' 진입');
+	ctx.body = execSync('/bin/sh funcset.sh '+func_name).toString();
+});
+
+router.post('/:func_name', async (ctx, next)=> {
+	const {func_name} = ctx.params;
+	const {content} = ctx.request.body;
+	fs.writeFileSync(func_name+".c", content, (err) =>{
+		if (err){
+			console.log(err);
+		}
+	});
+	ctx.body = execSync('/bin/sh grademe.sh '+func_name).toString();		
+});
+
+
+app.use(router.routes()).use(router.allowedMethods());
 https.createServer(options, app.callback()).listen(4000, function(){
 	console.log("server is listening on port 4000");
 });
-//http.createServer(app.callback()).listen(5000);
+// app.listen(4000);
+// http.createServer(app.callback()).listen(4000);
